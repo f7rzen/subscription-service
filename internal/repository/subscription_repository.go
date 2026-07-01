@@ -11,11 +11,11 @@ type SubscriptionRepository struct {
 	db *sqlx.DB
 }
 
-func NewSubscriptionRepository(db *sqlx.DB) *SubscriptionRepository {
-	return &SubscriptionRepository{
-		db: db,
-	}
-}
+//func NewSubscriptionRepository(db *sqlx.DB) *SubscriptionRepository {
+//	return &SubscriptionRepository{
+//		db: db,
+//	}
+//}
 
 func (r *SubscriptionRepository) Create(ctx context.Context, subscription model.Subscription) (model.Subscription, error) {
 	query := `
@@ -32,7 +32,7 @@ func (r *SubscriptionRepository) Create(ctx context.Context, subscription model.
 	`
 
 	var createdSubscription model.Subscription
-	
+
 	err := r.db.GetContext(
 		ctx,
 		&createdSubscription,
