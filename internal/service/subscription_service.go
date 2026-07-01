@@ -17,19 +17,19 @@ type SubscriptionService struct {
 	logger *slog.Logger
 }
 
-//func NewSubscriptionService(repo *repository.SubscriptionRepository, logger *slog.Logger) *SubscriptionService {
-//	return &SubscriptionService{
-//		repo:   repo,
-//		logger: logger,
-//	}
-//}
+func NewSubscriptionService(repo *repository.SubscriptionRepository, logger *slog.Logger) *SubscriptionService {
+	return &SubscriptionService{
+		repo:   repo,
+		logger: logger,
+	}
+}
 
 type SubscriptionInput struct {
-	ServiceName string
-	Price       int
-	UserID      string
-	StartDate   string
-	EndDate     *string
+	ServiceName string  `json:"service_name"`
+	Price       int     `json:"price"`
+	UserID      string  `json:"user_id"`
+	StartDate   string  `json:"start_date"`
+	EndDate     *string `json:"end_date,omitempty"`
 }
 
 func (s *SubscriptionService) Create(ctx context.Context, input SubscriptionInput) (model.Subscription, error) {

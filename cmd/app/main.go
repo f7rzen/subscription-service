@@ -8,6 +8,9 @@ import (
 
 	"github.com/f7rzen/subscription-service/internal/config"
 	"github.com/f7rzen/subscription-service/internal/db"
+	"github.com/f7rzen/subscription-service/internal/handler"
+	"github.com/f7rzen/subscription-service/internal/repository"
+	"github.com/f7rzen/subscription-service/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,6 +36,10 @@ func main() {
 	}
 	defer database.Close()
 
+	subscriptionRepository := repository.NewSubscriptionRepository(database)
+	subscriptionService := service.NewSubscriptionService(subscriptionRepository, logger)
+	subscriptionHandler := handler.NewSubscriptionHandler(subscriptionService, logger)
+
 	router := gin.Default()
 
 	router.GET("/health", func(c *gin.Context) {
@@ -40,6 +47,14 @@ func main() {
 			"status": "ok",
 		})
 	})
+
+	api := router.Group("/api/v1")
+	{
+		subscriptions := api.Group("/subscriptions")
+		{
+			subscriptions.POST("", subscriptionHandler.Create)
+		}
+	}
 
 	logger.Info(
 		"starting server",
