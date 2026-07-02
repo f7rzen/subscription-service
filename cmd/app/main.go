@@ -7,14 +7,22 @@ import (
 	"net/http"
 	"os"
 
+	_ "github.com/f7rzen/subscription-service/docs"
 	"github.com/f7rzen/subscription-service/internal/config"
 	"github.com/f7rzen/subscription-service/internal/db"
 	"github.com/f7rzen/subscription-service/internal/handler"
 	"github.com/f7rzen/subscription-service/internal/repository"
 	"github.com/f7rzen/subscription-service/internal/service"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title Subscription Service API
+// @version 1.0
+// @description REST API for managing user online subscriptions
+// @host localhost:8080
+// @BasePath /
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
@@ -48,6 +56,8 @@ func main() {
 			"status": "ok",
 		})
 	})
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	api := router.Group("/api/v1")
 	{

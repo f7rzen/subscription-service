@@ -23,7 +23,7 @@ func NewSubscriptionHandler(service *service.SubscriptionService, logger *slog.L
 	}
 }
 
-type subscriptionResponseDTO struct {
+type SubscriptionResponseDTO struct {
 	ID          int64     `json:"id"`
 	ServiceName string    `json:"service_name"`
 	Price       int       `json:"price"`
@@ -34,6 +34,28 @@ type subscriptionResponseDTO struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+type MessageResponse struct {
+	Message string `json:"message"`
+}
+
+type SummaryResponse struct {
+	TotalPrice int `json:"total_price"`
+}
+
+// Create godoc
+// @Summary Create subscription
+// @Description Create a new subscription record
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param input body service.SubscriptionInput true "Subscription input"
+// @Success 201 {object} SubscriptionResponseDTO
+// @Failure 400 {object} ErrorResponse
+// @Router /api/v1/subscriptions [post]
 func (h *SubscriptionHandler) Create(c *gin.Context) {
 	var input service.SubscriptionInput
 
@@ -57,6 +79,16 @@ func (h *SubscriptionHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, subscriptionResponse(subscription))
 }
 
+// GetByID godoc
+// @Summary Get subscription by ID
+// @Description Get subscription record by ID
+// @Tags subscriptions
+// @Produce json
+// @Param id path int true "Subscription ID"
+// @Success 200 {object} SubscriptionResponseDTO
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Router /api/v1/subscriptions/{id} [get]
 func (h *SubscriptionHandler) GetByID(c *gin.Context) {
 	id, ok := parseSubscriptionID(c)
 	if !ok {
@@ -74,6 +106,14 @@ func (h *SubscriptionHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, subscriptionResponse(subscription))
 }
 
+// List godoc
+// @Summary List subscriptions
+// @Description Get all subscription records
+// @Tags subscriptions
+// @Produce json
+// @Success 200 {array} SubscriptionResponseDTO
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/subscriptions [get]
 func (h *SubscriptionHandler) List(c *gin.Context) {
 	subscriptions, err := h.service.List(c.Request.Context())
 	if err != nil {
@@ -85,7 +125,7 @@ func (h *SubscriptionHandler) List(c *gin.Context) {
 		return
 	}
 
-	response := make([]subscriptionResponseDTO, 0, len(subscriptions))
+	response := make([]SubscriptionResponseDTO, 0, len(subscriptions))
 
 	for _, subscription := range subscriptions {
 		response = append(response, subscriptionResponse(subscription))
@@ -94,6 +134,17 @@ func (h *SubscriptionHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// Update godoc
+// @Summary Update subscription
+// @Description Update subscription record by ID
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param id path int true "Subscription ID"
+// @Param input body service.SubscriptionInput true "Subscription input"
+// @Success 200 {object} SubscriptionResponseDTO
+// @Failure 400 {object} ErrorResponse
+// @Router /api/v1/subscriptions/{id} [put]
 func (h *SubscriptionHandler) Update(c *gin.Context) {
 	id, ok := parseSubscriptionID(c)
 	if !ok {
@@ -122,6 +173,16 @@ func (h *SubscriptionHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, subscriptionResponse(subscription))
 }
 
+// Delete godoc
+// @Summary Delete subscription
+// @Description Delete subscription record by ID
+// @Tags subscriptions
+// @Produce json
+// @Param id path int true "Subscription ID"
+// @Success 200 {object} MessageResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/subscriptions/{id} [delete]
 func (h *SubscriptionHandler) Delete(c *gin.Context) {
 	id, ok := parseSubscriptionID(c)
 	if !ok {
@@ -140,6 +201,18 @@ func (h *SubscriptionHandler) Delete(c *gin.Context) {
 	})
 }
 
+// Summary godoc
+// @Summary Calculate subscription summary
+// @Description Calculate total subscription price for selected period filtered by user_id and service_name
+// @Tags subscriptions
+// @Produce json
+// @Param user_id query string true "User ID in UUID format"
+// @Param service_name query string true "Service name"
+// @Param from query string true "Start period in MM-YYYY format"
+// @Param to query string true "End period in MM-YYYY format"
+// @Success 200 {object} SummaryResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /api/v1/subscriptions-summary [get]
 func (h *SubscriptionHandler) Summary(c *gin.Context) {
 	userID := c.Query("user_id")
 	serviceName := c.Query("service_name")
@@ -177,8 +250,8 @@ func parseSubscriptionID(c *gin.Context) (int64, bool) {
 	return id, true
 }
 
-func subscriptionResponse(subscription model.Subscription) subscriptionResponseDTO {
-	return subscriptionResponseDTO{
+func subscriptionResponse(subscription model.Subscription) SubscriptionResponseDTO {
+	return SubscriptionResponseDTO{
 		ID:          subscription.ID,
 		ServiceName: subscription.ServiceName,
 		Price:       subscription.Price,
