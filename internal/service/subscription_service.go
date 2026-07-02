@@ -66,7 +66,6 @@ func (s *SubscriptionService) Create(ctx context.Context, input SubscriptionInpu
 	}
 
 	subscription := model.Subscription{
-		ID:          uuid.NewString(),
 		ServiceName: serviceName,
 		Price:       input.Price,
 		UserID:      input.UserID,
@@ -82,7 +81,7 @@ func (s *SubscriptionService) Create(ctx context.Context, input SubscriptionInpu
 
 	s.logger.Info(
 		"subscription created",
-		slog.String("id", createdSubscription.ID),
+		slog.Int64("id", createdSubscription.ID),
 		slog.String("user_id", createdSubscription.UserID),
 		slog.String("service_name", createdSubscription.ServiceName),
 	)
@@ -90,14 +89,14 @@ func (s *SubscriptionService) Create(ctx context.Context, input SubscriptionInpu
 	return createdSubscription, nil
 }
 
-func (s *SubscriptionService) GetByID(ctx context.Context, id string) (model.Subscription, error) {
-	if err := uuid.Validate(id); err != nil {
+func (s *SubscriptionService) GetByID(ctx context.Context, id int64) (model.Subscription, error) {
+	if id <= 0 {
 		return model.Subscription{}, errors.New("invalid subscription id")
 	}
 
 	subscription, err := s.repo.GetByID(ctx, id)
 	if err != nil {
-		s.logger.Error("failed to get subscription", slog.String("id", id), slog.String("error", err.Error()))
+		s.logger.Error("failed to get subscription", slog.Int64("id", id), slog.String("error", err.Error()))
 		return model.Subscription{}, err
 	}
 
@@ -114,11 +113,10 @@ func (s *SubscriptionService) List(ctx context.Context) ([]model.Subscription, e
 	return subscriptions, nil
 }
 
-func (s *SubscriptionService) Update(ctx context.Context, id string, input SubscriptionInput) (model.Subscription, error) {
-	if err := uuid.Validate(id); err != nil {
+func (s *SubscriptionService) Update(ctx context.Context, id int64, input SubscriptionInput) (model.Subscription, error) {
+	if id <= 0 {
 		return model.Subscription{}, errors.New("invalid subscription id")
 	}
-
 	serviceName := strings.TrimSpace(input.ServiceName)
 	if serviceName == "" {
 		return model.Subscription{}, errors.New("service_name is required")
@@ -168,7 +166,6 @@ func (s *SubscriptionService) Update(ctx context.Context, id string, input Subsc
 
 	s.logger.Info(
 		"subscription updated",
-		slog.String("id", updatedSubscription.ID),
 		slog.String("user_id", updatedSubscription.UserID),
 		slog.String("service_name", updatedSubscription.ServiceName),
 	)
@@ -176,8 +173,8 @@ func (s *SubscriptionService) Update(ctx context.Context, id string, input Subsc
 	return updatedSubscription, nil
 }
 
-func (s *SubscriptionService) Delete(ctx context.Context, id string) error {
-	if err := uuid.Validate(id); err != nil {
+func (s *SubscriptionService) Delete(ctx context.Context, id int64) error {
+	if id <= 0 {
 		return errors.New("invalid subscription id")
 	}
 
@@ -186,7 +183,7 @@ func (s *SubscriptionService) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	s.logger.Info("subscription deleted", slog.String("id", id))
+	s.logger.Info("subscription deleted", slog.Int64("id", id))
 
 	return nil
 }

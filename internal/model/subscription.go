@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Subscription struct {
-	ID          string     `db:"id"`
+	ID          int64      `db:"id"`
 	ServiceName string     `db:"service_name"`
 	Price       int        `db:"price"`
 	UserID      string     `db:"user_id"`

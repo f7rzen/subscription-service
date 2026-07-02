@@ -20,14 +20,13 @@ func NewSubscriptionRepository(db *sqlx.DB) *SubscriptionRepository {
 func (r *SubscriptionRepository) Create(ctx context.Context, subscription model.Subscription) (model.Subscription, error) {
 	query := `
 		INSERT INTO subscriptions (
-			id,
 			service_name,
 			price,
 			user_id,
 			start_date,
 			end_date
 		)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, service_name, price, user_id, start_date, end_date, created_at, updated_at
 	`
 
@@ -37,7 +36,6 @@ func (r *SubscriptionRepository) Create(ctx context.Context, subscription model.
 		ctx,
 		&createdSubscription,
 		query,
-		subscription.ID,
 		subscription.ServiceName,
 		subscription.Price,
 		subscription.UserID,
@@ -51,7 +49,7 @@ func (r *SubscriptionRepository) Create(ctx context.Context, subscription model.
 	return createdSubscription, nil
 }
 
-func (r *SubscriptionRepository) GetByID(ctx context.Context, id string) (model.Subscription, error) {
+func (r *SubscriptionRepository) GetByID(ctx context.Context, id int64) (model.Subscription, error) {
 	query := `
 		SELECT id, service_name, price, user_id, start_date, end_date, created_at, updated_at
 		FROM subscriptions
@@ -119,7 +117,7 @@ func (r *SubscriptionRepository) Update(ctx context.Context, subscription model.
 	return updatedSubscription, nil
 }
 
-func (r *SubscriptionRepository) Delete(ctx context.Context, id string) error {
+func (r *SubscriptionRepository) Delete(ctx context.Context, id int64) error {
 	query := `
 		DELETE FROM subscriptions
 		WHERE id = $1

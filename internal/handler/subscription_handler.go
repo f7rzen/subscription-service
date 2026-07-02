@@ -23,10 +23,8 @@ func NewSubscriptionHandler(service *service.SubscriptionService, logger *slog.L
 
 func (h *SubscriptionHandler) Create(c *gin.Context) {
 	var input service.SubscriptionInput
-
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.logger.Warn("invalid request body", slog.String("error", err.Error()))
-
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request body",
 		})
