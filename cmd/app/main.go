@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/f7rzen/subscription-service/internal/config"
@@ -43,7 +44,7 @@ func main() {
 	router := gin.Default()
 
 	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
 		})
 	})
@@ -53,7 +54,13 @@ func main() {
 		subscriptions := api.Group("/subscriptions")
 		{
 			subscriptions.POST("", subscriptionHandler.Create)
+			subscriptions.GET("", subscriptionHandler.List)
+			subscriptions.GET("/:id", subscriptionHandler.GetByID)
+			subscriptions.PUT("/:id", subscriptionHandler.Update)
+			subscriptions.DELETE("/:id", subscriptionHandler.Delete)
 		}
+
+		api.GET("/subscriptions-summary", subscriptionHandler.Summary)
 	}
 
 	logger.Info(
